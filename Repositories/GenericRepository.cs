@@ -15,7 +15,7 @@ namespace SocialMediaApi.Repositories
             DbEntitySet = context.Set<TEntity>();
         }
 
-        public async Task Create(TEntity entity)
+        public async Task CreateAsync(TEntity entity)
         {
             await DbEntitySet.AddAsync(entity);
         }

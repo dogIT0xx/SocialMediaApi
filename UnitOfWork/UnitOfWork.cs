@@ -1,7 +1,9 @@
-﻿using SocialMediaApi.Migrations;
-using SocialMediaAPI.UnitOfWork;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using SocialMediaApi.Entities;
+using SocialMediaApi.Migrations;
+using SocialMediaApi.UnitOfWork;
 using SocialMediaApi.Repositories;
-using SocialMediaApi.Repositories.Interfaces;
 
 namespace SocialMediaApi.UnitOfWork
 {
@@ -9,13 +11,15 @@ namespace SocialMediaApi.UnitOfWork
     {
         private readonly ApplicationDbContext _context;
 
-        public IUserRepository UserRepository { get; }
+        public UserRepository UserRepository { get; }
+        public PostRepository PostRepository { get; }
 
-        public UnitOfWork(ApplicationDbContext context)
+        public UnitOfWork(
+           ApplicationDbContext context)
         {
             _context = context;
-
-            UserRepository = new UserRepository(_context);
+            UserRepository = new UserRepository(context);
+            PostRepository = new PostRepository(context);
         }
 
         public async Task<int> CompleteAsync()

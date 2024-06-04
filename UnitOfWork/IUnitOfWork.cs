@@ -1,11 +1,14 @@
-﻿using SocialMediaApi.Repositories.Interfaces;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using SocialMediaApi.Entities;
+using SocialMediaApi.Repositories;
 
-namespace SocialMediaAPI.UnitOfWork
+namespace SocialMediaApi.UnitOfWork
 {
     public interface IUnitOfWork : IDisposable
     {
-        IUserRepository UserRepository { get; }
-
+        UserRepository UserRepository { get; }
+        PostRepository PostRepository { get; }
         Task<int> CompleteAsync();
     }
 }

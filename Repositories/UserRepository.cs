@@ -1,36 +1,22 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using SocialMediaApi.Entities;
-using SocialMediaApi.Repositories.Interfaces;
+using SocialMediaApi.Migrations;
 
-// Use default userStore Identity Framework
 namespace SocialMediaApi.Repositories
 {
-    public class UserRepository : UserStore<UserEntity>, IUserRepository
+    public class UserRepository : UserStore<UserEntity>
     {
-        public UserRepository(DbContext context) : base(context)
+        public UserRepository(ApplicationDbContext context) : base(context)
         {
             AutoSaveChanges = false;
         }
 
-        public async Task<UserEntity?> GetByIdAsync(object id)
+        public async Task<bool> CheckExistById(string id)
         {
-            throw new NotImplementedException();
-        }
-
-        public async Task Create(UserEntity entity)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Update(UserEntity entity)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Delete(UserEntity entity)
-        {
-            throw new NotImplementedException();
+            var result = await Users.AnyAsync(i => i.Id == id);
+            return result;
         }
     }
 }
