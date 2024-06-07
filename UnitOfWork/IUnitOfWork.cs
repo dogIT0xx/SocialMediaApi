@@ -7,7 +7,6 @@ namespace SocialMediaApi.UnitOfWork
 {
     public interface IUnitOfWork : IDisposable
     {
-        UserRepository UserRepository { get; }
         PostRepository PostRepository { get; }
         Task<int> CompleteAsync();
     }

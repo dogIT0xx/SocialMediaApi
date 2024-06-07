@@ -11,14 +11,12 @@ namespace SocialMediaApi.UnitOfWork
     {
         private readonly ApplicationDbContext _context;
 
-        public UserRepository UserRepository { get; }
         public PostRepository PostRepository { get; }
 
         public UnitOfWork(
            ApplicationDbContext context)
         {
             _context = context;
-            UserRepository = new UserRepository(context);
             PostRepository = new PostRepository(context);
         }
 

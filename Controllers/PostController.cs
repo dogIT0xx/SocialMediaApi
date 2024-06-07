@@ -30,12 +30,6 @@ namespace SocialMediaApi.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreatePostReq req)
         {
-            var isExist = await _unitOfWork.UserRepository.CheckExistById(req.AuthorId);
-            if (!isExist)
-            {
-                return BadRequest("Not Found User");
-            }
-
             var post = new PostEntity()
             {
                 AuthorId = req.AuthorId,
