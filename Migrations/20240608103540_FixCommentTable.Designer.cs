@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SocialMediaApi.Migrations;
 
@@ -11,9 +12,11 @@ using SocialMediaApi.Migrations;
 namespace SocialMediaApi.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240608103540_FixCommentTable")]
+    partial class FixCommentTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -253,11 +256,8 @@ namespace SocialMediaApi.Migrations
 
             modelBuilder.Entity("SocialMediaApi.Entities.CommentEntity", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Content")
                         .IsRequired()
@@ -266,11 +266,11 @@ namespace SocialMediaApi.Migrations
                     b.Property<int>("CreatedAt")
                         .HasColumnType("int");
 
-                    b.Property<int?>("ParentCommentId")
-                        .HasColumnType("int");
+                    b.Property<string>("ParentCommentId")
+                        .HasColumnType("nvarchar(450)");
 
-                    b.Property<int>("PostId")
-                        .HasColumnType("int");
+                    b.Property<string>("ReceiverUserId")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<int?>("UpdateAt")
                         .HasColumnType("int");
@@ -283,7 +283,7 @@ namespace SocialMediaApi.Migrations
 
                     b.HasIndex("ParentCommentId");
 
-                    b.HasIndex("PostId");
+                    b.HasIndex("ReceiverUserId");
 
                     b.HasIndex("UserId");
 
@@ -465,11 +465,10 @@ namespace SocialMediaApi.Migrations
                         .HasForeignKey("ParentCommentId")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("SocialMediaApi.Entities.PostEntity", "Post")
+                    b.HasOne("SocialMediaApi.Entities.UserEntity", "ReceiverUser")
                         .WithMany()
-                        .HasForeignKey("PostId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
+                        .HasForeignKey("ReceiverUserId")
+                        .OnDelete(DeleteBehavior.NoAction);
 
                     b.HasOne("SocialMediaApi.Entities.UserEntity", "User")
                         .WithMany()
@@ -479,7 +478,7 @@ namespace SocialMediaApi.Migrations
 
                     b.Navigation("ParentComment");
 
-                    b.Navigation("Post");
+                    b.Navigation("ReceiverUser");
 
                     b.Navigation("User");
                 });

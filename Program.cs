@@ -8,7 +8,6 @@ using SocialMediaApi.Migrations;
 using SocialMediaApi.Repositories;
 using SocialMediaApi.Repositories.Interfaces;
 using SocialMediaApi.UnitOfWork;
-using SocialMediaApi.UnitOfWork;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);

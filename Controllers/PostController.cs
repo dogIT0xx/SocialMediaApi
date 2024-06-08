@@ -9,27 +9,32 @@ using SocialMediaApi.UnitOfWork;
 using SocialMediaApi;
 using SocialMediaApi.Share.ResponseModels;
 using Mapster;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 namespace SocialMediaApi.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/[controller]/[action]")]
     [ApiController]
     public class PostController : ControllerBase
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly UserManager<UserEntity> _userManager;
         private readonly ILogger<PostController> _logger;
 
-        public PostController(IUnitOfWork unitOfWork, ILogger<PostController> logger, UserManager<UserEntity> userManager)
+        public PostController(IUnitOfWork unitOfWork, ILogger<PostController> logger)
         {
             _unitOfWork = unitOfWork;
             _logger = logger;
-            _userManager = userManager;
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] CreatePostReq req)
+        public async Task<ActionResult> Create([FromBody] CreatePostReq req)
         {
+            var userExits = await _unitOfWork.UserRepository.CheckExitsAsync(req.AuthorId);
+            if (!userExits)
+            {
+                return Problem("Author invalid");
+            }
+
             var post = new PostEntity()
             {
                 AuthorId = req.AuthorId,
@@ -43,17 +48,17 @@ namespace SocialMediaApi.Controllers
             var result = await _unitOfWork.CompleteAsync();
             if (result > 0)
             {
-                return Ok(result);
+                return Ok(new { StatusCode = StatusCodes.Status200OK });
             }
-            return BadRequest(result);
+
+            return Problem("Create post failed");
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> Get([FromRoute] int id)
+        public async Task<ActionResult> Get([FromRoute] int id)
         {
             var post = await _unitOfWork.PostRepository.GetByIdAsync(id);
-            var result = await _unitOfWork.CompleteAsync();
-            if (post == null)
+            if (post is null)
             {
                 return NotFound();
             }
@@ -62,13 +67,57 @@ namespace SocialMediaApi.Controllers
         }
 
         [HttpPatch("{id}")]
-        public async Task<IActionResult> Update([FromRoute] string id, [FromBody] UpdatePostReq req)
+        public async Task<ActionResult> Update([FromRoute] string id, [FromBody] UpdatePostReq req)
         {
             return Ok();
         }
 
         [HttpDelete]
-        public async Task<IActionResult> Delete([FromQuery] string id)
+        public async Task<ActionResult> Delete([FromQuery] string id)
+        {
+            return Ok();
+        }
+
+
+        [HttpGet]
+        public async Task<ActionResult> Comment()
+        {
+            return Ok();
+        }
+
+        [HttpGet]
+        public async Task<ActionResult> ReplyComment()
+        {
+            return Ok();
+        }
+
+        [HttpGet]
+        public async Task<ActionResult> UpdateComment()
+        {
+            return Ok();
+        }
+
+        [HttpGet]
+        public async Task<ActionResult> DeleteComment()
+        {
+            return Ok();
+        }
+
+        [HttpGet]
+        public async Task<ActionResult> GetAllCommentOfPost()
+        {
+            return Ok();
+        }
+
+        [HttpGet]
+        public async Task<ActionResult> Like()
+        {
+            return Ok();
+        }
+
+        
+        [HttpGet]
+        public async Task<ActionResult> Unlike()
         {
             return Ok();
         }

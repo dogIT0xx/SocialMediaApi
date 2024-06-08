@@ -30,7 +30,7 @@ namespace SocialMediaApi.Controllers
         }
 
         [HttpPost]
-        public async Task<IdentityResult> SignUp([FromBody] SignUpReq req)
+        public async Task<ActionResult> SignUp([FromBody] SignUpReq req)
         {
             var user = new UserEntity
             {
@@ -40,35 +40,32 @@ namespace SocialMediaApi.Controllers
 
             // Tạo user sẽ tự bắt lỗi các validate
             var identityResult = await _userManager.CreateAsync(user, req.Password);
-
             if (!identityResult.Succeeded)
             {
-                return IdentityResult.Failed(identityResult.Errors.ToArray());
+                return Problem(
+                    detail: identityResult.ToString(),
+                    statusCode: StatusCodes.Status400BadRequest);
             }
 
-            return IdentityResult.Success;
+            return Ok( new {StatusCode= StatusCodes.Status200OK});
         }
 
-
         [HttpPost]
-        public async Task<Results<Ok<AccessTokenResponse>, ProblemHttpResult>> SignIn(
-            [FromBody] SignInReq req,
-            [FromQuery] bool? useCookies,
-            [FromQuery] bool? useSessionCookies)
+        public async Task<ActionResult> SignIn(
+            [FromBody] SignInReq req)
         {
-            var useCookieScheme = (useCookies == true) || (useSessionCookies == true);
-            var isPersistent = (useCookies == true) && (useSessionCookies != true);
-            _signInManager.AuthenticationScheme = 
-                useCookieScheme ? IdentityConstants.ApplicationScheme : IdentityConstants.BearerScheme;
 
-            var result = await _signInManager.PasswordSignInAsync(req.UserName, req.Password, isPersistent, lockoutOnFailure: true);
+            _signInManager.AuthenticationScheme = IdentityConstants.BearerScheme;
+
+            var result = await _signInManager.PasswordSignInAsync(
+                req.UserName, req.Password, isPersistent: false, lockoutOnFailure: true);
 
             if (result.RequiresTwoFactor)
             {
                 if (!string.IsNullOrEmpty(req.TwoFactorCode))
                 {
                     result = await _signInManager.TwoFactorAuthenticatorSignInAsync(
-                        req.TwoFactorCode, isPersistent, rememberClient: isPersistent);
+                        req.TwoFactorCode, isPersistent: false, rememberClient: false);
                 }
                 else if (!string.IsNullOrEmpty(req.TwoFactorRecoveryCode))
                 {
@@ -79,7 +76,7 @@ namespace SocialMediaApi.Controllers
 
             if (!result.Succeeded)
             {
-                return TypedResults.Problem(result.ToString(), statusCode: StatusCodes.Status401Unauthorized);
+                return Problem(result.ToString(), statusCode: StatusCodes.Status401Unauthorized);
             }
 
             var accessTokenResponse = new AccessTokenResponse
@@ -88,7 +85,7 @@ namespace SocialMediaApi.Controllers
                 ExpiresIn = 10,
                 RefreshToken = null
             };
-            return TypedResults.Ok(accessTokenResponse!);
+            return Ok(accessTokenResponse!);
         }
 
 
@@ -145,6 +142,42 @@ namespace SocialMediaApi.Controllers
 
             var result = new JwtSecurityTokenHandler().WriteToken(token);
             return result;
+        }
+
+        [HttpGet]
+        public async Task<ActionResult> ForgotPassword()
+        {
+            return Ok();
+        }
+
+        [HttpGet]
+        public async Task<ActionResult> ConfimEmail()
+        {
+            return Ok();
+        }
+
+        [HttpGet]
+        public async Task<ActionResult> ResendConfirmEmail()
+        {
+            return Ok();
+        }
+
+        [HttpGet]
+        public async Task<ActionResult> ResetPassword()
+        {
+            return Ok();
+        }
+
+        [HttpGet]
+        public async Task<ActionResult> GetInfoUser()
+        {
+            return Ok();
+        }
+
+        [HttpGet]
+        public async Task<ActionResult> UpdateInfoUser()
+        {
+            return Ok();
         }
     }
 }

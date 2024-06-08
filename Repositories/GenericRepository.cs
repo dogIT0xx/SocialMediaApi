@@ -6,7 +6,7 @@ namespace SocialMediaApi.Repositories
 {
     public class GenericRepository<TEntity> : IGenericRepository<TEntity> where TEntity : class
     {
-        protected readonly ApplicationDbContext Context;
+        private readonly ApplicationDbContext Context;
         protected DbSet<TEntity> DbEntitySet { get; }
 
         public GenericRepository(ApplicationDbContext context)

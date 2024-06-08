@@ -4,6 +4,7 @@ using SocialMediaApi.Entities;
 using SocialMediaApi.Migrations;
 using SocialMediaApi.UnitOfWork;
 using SocialMediaApi.Repositories;
+using SocialMediaApi.Repositories.Interfaces;
 
 namespace SocialMediaApi.UnitOfWork
 {
@@ -11,13 +12,14 @@ namespace SocialMediaApi.UnitOfWork
     {
         private readonly ApplicationDbContext _context;
 
-        public PostRepository PostRepository { get; }
+        public IPostRepository PostRepository { get; }
+        public IUserRepository UserRepository { get; }
 
-        public UnitOfWork(
-           ApplicationDbContext context)
+        public UnitOfWork(ApplicationDbContext context)
         {
             _context = context;
             PostRepository = new PostRepository(context);
+            UserRepository = new UserRepository(context);
         }
 
         public async Task<int> CompleteAsync()

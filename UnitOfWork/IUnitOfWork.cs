@@ -2,12 +2,14 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using SocialMediaApi.Entities;
 using SocialMediaApi.Repositories;
+using SocialMediaApi.Repositories.Interfaces;
 
 namespace SocialMediaApi.UnitOfWork
 {
     public interface IUnitOfWork : IDisposable
     {
-        PostRepository PostRepository { get; }
+        IPostRepository PostRepository { get; }
+        IUserRepository UserRepository { get; }
         Task<int> CompleteAsync();
     }
 }
