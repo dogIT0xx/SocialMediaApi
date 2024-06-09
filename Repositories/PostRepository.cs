@@ -13,5 +13,11 @@ namespace SocialMediaApi.Repositories
         {
 
         }
+
+        public async Task<bool> CheckExitsAsync(int postId)
+        {
+            var result =  await DbEntitySet.AnyAsync(i => i.Id == postId);
+            return result;
+        }
     }
 }

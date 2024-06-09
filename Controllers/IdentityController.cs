@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using Share.RequestModels;
@@ -7,9 +6,8 @@ using SocialMediaApi.Entities;
 using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages;
 using Microsoft.AspNetCore.Authentication.BearerToken;
+using SocialMediaApi.Core;
 
 namespace SocialMediaApi.Controllers
 {
@@ -47,7 +45,7 @@ namespace SocialMediaApi.Controllers
                     statusCode: StatusCodes.Status400BadRequest);
             }
 
-            return Ok( new {StatusCode= StatusCodes.Status200OK});
+            return Ok(new SuccessObject());
         }
 
         [HttpPost]

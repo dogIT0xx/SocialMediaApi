@@ -1,15 +1,11 @@
-﻿using System.Net;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Share.RequestModels;
 using SocialMediaApi.Entities;
 using SocialMediaApi.UnitOfWork;
-using SocialMediaApi;
 using SocialMediaApi.Share.ResponseModels;
 using Mapster;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using SocialMediaApi.Core;
 
 namespace SocialMediaApi.Controllers
 {
@@ -48,9 +44,9 @@ namespace SocialMediaApi.Controllers
             var result = await _unitOfWork.CompleteAsync();
             if (result > 0)
             {
-                return Ok(new { StatusCode = StatusCodes.Status200OK });
+                return Created(String.Empty, new SuccessObject());
             }
-
+            
             return Problem("Create post failed");
         }
 
@@ -66,10 +62,27 @@ namespace SocialMediaApi.Controllers
             return Ok(res);
         }
 
-        [HttpPatch("{id}")]
-        public async Task<ActionResult> Update([FromRoute] string id, [FromBody] UpdatePostReq req)
+        [HttpPut]
+        public async Task<ActionResult> Update([FromBody] UpdatePostReq req)
         {
-            return Ok();
+
+            var post = await _unitOfWork.PostRepository.GetByIdAsync(req.PostId);
+            if (post is null)
+            {
+                return NotFound();
+            }
+
+            post.Content = req.Title;
+            post.Content = req.Content;
+
+            _unitOfWork.PostRepository.Update(post);
+            var result = await _unitOfWork.CompleteAsync();
+
+            if (result < 0)
+            {
+                return Problem("Error", statusCode: StatusCodes.Status304NotModified);
+            }
+            return Ok(new SuccessObject());
         }
 
         [HttpDelete]
@@ -115,7 +128,7 @@ namespace SocialMediaApi.Controllers
             return Ok();
         }
 
-        
+
         [HttpGet]
         public async Task<ActionResult> Unlike()
         {
