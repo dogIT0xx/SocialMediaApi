@@ -10,7 +10,7 @@ namespace SocialMediaApi.Migrations
         public DbSet<CommentEntity> CommentEntity { get; set; }
         public DbSet<FollowEntity> FollowEntity { get; set; }
         public DbSet<GroupEntity> GroupEntity { get; set; }
-        //public DbSet<LikeEntity> LikeEntity { get; set; }
+        public DbSet<LikeEntity> LikeEntity { get; set; }
         public DbSet<PostEntity> PostEntity { get; set; }
         public DbSet<UserEntity> UserEntity { get; set; }
 

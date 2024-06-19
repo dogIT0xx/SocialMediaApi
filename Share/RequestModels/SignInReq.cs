@@ -5,14 +5,14 @@ namespace Share.RequestModels;
 public sealed record SignInReq
 {
     [Required]
-    public string UserName { get; set; }
+    public string UserName { get; init; }
 
     [Required]
-    public string Password { get; set; }
+    public string Password { get; init; }
 
     [Required]
-    public bool RememberMe { get; set; }
+    public bool RememberMe { get; init; }
 
-    public string? TwoFactorCode { get; set; }
-    public string? TwoFactorRecoveryCode { get; set; }
+    public string? TwoFactorCode { get; init; }
+    public string? TwoFactorRecoveryCode { get; init; }
 }

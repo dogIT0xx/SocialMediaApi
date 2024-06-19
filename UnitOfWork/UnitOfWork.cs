@@ -14,12 +14,16 @@ namespace SocialMediaApi.UnitOfWork
 
         public IPostRepository PostRepository { get; }
         public IUserRepository UserRepository { get; }
+        public ICommentRepository CommentRepository { get; }
+        public ILikeRepository LikeRepository { get; }
 
         public UnitOfWork(ApplicationDbContext context)
         {
             _context = context;
             PostRepository = new PostRepository(context);
             UserRepository = new UserRepository(context);
+            CommentRepository = new CommentRepository(context);
+            LikeRepository = new LikeRepository(context);
         }
 
         public async Task<int> CompleteAsync()

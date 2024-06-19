@@ -9,6 +9,8 @@ using SocialMediaApi.Repositories;
 using SocialMediaApi.Repositories.Interfaces;
 using SocialMediaApi.UnitOfWork;
 using System.Text;
+using SocialMediaApi.Core.Config;
+using Microsoft.Extensions.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -35,20 +37,29 @@ builder.Services.AddTransient(typeof(IGenericRepository<>), typeof(GenericReposi
 
 builder.Services.AddTransient<IUnitOfWork, UnitOfWork>();
 
+
+var jwtConfig = new JwtConfig();
+builder.Configuration.GetSection("JwtAuthentication").Bind(jwtConfig);
+
 builder.Services
-    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddAuthentication(options =>
+            {
+                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
     .AddJwtBearer(options =>
     {
-        var key = Encoding.ASCII.GetBytes("%SocialMediaSecret@1183002#Vietnamese%");
-
         options.SaveToken = true;
         options.RequireHttpsMetadata = false;
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(key),
-            ValidateIssuer = false,
-            ValidateAudience = false,
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(jwtConfig.SecretKey)),
+            RequireExpirationTime = true,
+            ValidAlgorithms = jwtConfig.Algorithm,
+            ValidIssuer = jwtConfig.Issuer,
         };
     });
 

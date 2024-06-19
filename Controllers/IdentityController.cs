@@ -7,7 +7,9 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authentication.BearerToken;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using SocialMediaApi.Core;
+using JwtConstants = Microsoft.IdentityModel.JsonWebTokens.JwtConstants;
 
 namespace SocialMediaApi.Controllers
 {
@@ -18,13 +20,18 @@ namespace SocialMediaApi.Controllers
         private readonly UserManager<UserEntity> _userManager;
         private readonly RoleManager<UserEntity> _roleManager;
         private readonly SignInManager<UserEntity> _signInManager;
+        private readonly ILogger<IdentityController> _logger;
 
         public IdentityController(
             UserManager<UserEntity> userManager,
-            SignInManager<UserEntity> signInManager)
+            SignInManager<UserEntity> signInManager, 
+            RoleManager<UserEntity> roleManager, 
+            ILogger<IdentityController> logger)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _roleManager = roleManager;
+            _logger = logger;
         }
 
         [HttpPost]
@@ -44,7 +51,6 @@ namespace SocialMediaApi.Controllers
                     detail: identityResult.ToString(),
                     statusCode: StatusCodes.Status400BadRequest);
             }
-
             return Ok(new SuccessObject());
         }
 

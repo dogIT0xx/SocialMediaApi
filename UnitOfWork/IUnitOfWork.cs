@@ -10,6 +10,8 @@ namespace SocialMediaApi.UnitOfWork
     {
         IPostRepository PostRepository { get; }
         IUserRepository UserRepository { get; }
+        ICommentRepository CommentRepository { get; }
+        ILikeRepository LikeRepository { get; }
         Task<int> CompleteAsync();
     }
 }

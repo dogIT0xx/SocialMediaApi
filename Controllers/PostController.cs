@@ -6,10 +6,12 @@ using SocialMediaApi.Share.ResponseModels;
 using Mapster;
 using Microsoft.IdentityModel.Tokens;
 using SocialMediaApi.Core;
+using SocialMediaApi.Share.RequestModels;
+using System.ComponentModel.Design;
 
 namespace SocialMediaApi.Controllers
 {
-    [Route("api/[controller]/[action]")]
+    [Route("Api/[controller]/[action]")]
     [ApiController]
     public class PostController : ControllerBase
     {
@@ -23,7 +25,7 @@ namespace SocialMediaApi.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> Create([FromBody] CreatePostReq req)
+        public async Task<ActionResult> Create(CreatePostReq req)
         {
             var userExits = await _unitOfWork.UserRepository.CheckExitsAsync(req.AuthorId);
             if (!userExits)
@@ -46,12 +48,21 @@ namespace SocialMediaApi.Controllers
             {
                 return Created(String.Empty, new SuccessObject());
             }
-            
+
             return Problem("Create post failed");
         }
 
-        [HttpGet("{id}")]
-        public async Task<ActionResult> Get([FromRoute] int id)
+
+        [HttpGet]
+        public async Task<ActionResult> GetAll(PaginationReq req)
+        {
+            var posts = await _unitOfWork.PostRepository.GetPostsAsync(req.PageSize, req.PageIndex);
+            return Ok(posts);
+        }
+
+
+        [HttpGet]
+        public async Task<ActionResult> Get(int id)
         {
             var post = await _unitOfWork.PostRepository.GetByIdAsync(id);
             if (post is null)
@@ -63,7 +74,7 @@ namespace SocialMediaApi.Controllers
         }
 
         [HttpPut]
-        public async Task<ActionResult> Update([FromBody] UpdatePostReq req)
+        public async Task<ActionResult> Update(UpdatePostReq req)
         {
 
             var post = await _unitOfWork.PostRepository.GetByIdAsync(req.PostId);
@@ -86,53 +97,137 @@ namespace SocialMediaApi.Controllers
         }
 
         [HttpDelete]
-        public async Task<ActionResult> Delete([FromQuery] string id)
+        public async Task<ActionResult> Delete(int id)
         {
-            return Ok();
+            var postExits = await _unitOfWork.PostRepository.CheckExitsAsync(id);
+            if (postExits)
+            {
+                var postEntity = await _unitOfWork.PostRepository.GetByIdAsync(id);
+                postEntity!.IsDeleted = true;
+                postEntity!.DeleteAt = Helper.GetUtcTimestampNow();
+
+                _unitOfWork.PostRepository.Update(postEntity);
+                await _unitOfWork.CompleteAsync();
+                return Ok(new SuccessObject());
+            }
+            else
+            {
+                return NotFound();
+            }
         }
 
-
-        [HttpGet]
-        public async Task<ActionResult> Comment()
+        [HttpPost]
+        public async Task<ActionResult> Comment(CreateCommentReq req)
         {
-            return Ok();
+            var postExits = await _unitOfWork.PostRepository.CheckExitsAsync(req.PostId);
+            if (!postExits)
+            {
+                return NotFound();
+            }
+
+            var commendEntity = new CommentEntity
+            {
+                Content = req.Content,
+                ParentCommentId = req.ParentCommentId,
+                UserId = req.UserId,
+                PostId = req.PostId,
+                CreatedAt = Helper.GetUtcTimestampNow()
+            };
+
+            await _unitOfWork.CommentRepository.CreateAsync(commendEntity);
+            await _unitOfWork.CompleteAsync();
+            return Ok(new SuccessObject());
+        }
+
+        [HttpPost]
+        public async Task<ActionResult> UpdateComment(UpdateCommentReq req)
+        {
+            var commentEntity = await _unitOfWork.CommentRepository.GetByIdAsync(req.CommentId);
+            if (commentEntity is null)
+            {
+                return NotFound();
+            }
+            commentEntity.Content = req.Content;
+            _unitOfWork.CommentRepository.Update(commentEntity);
+            await _unitOfWork.CompleteAsync();
+
+            return Ok(new SuccessObject());
+        }
+
+        [HttpDelete]
+        public async Task<ActionResult> DeleteComment(int commentId)
+        {
+            var commentEntity = await _unitOfWork.CommentRepository.GetByIdAsync(commentId);
+            if (commentEntity is null)
+            {
+                return NotFound();
+            }
+            // Delete all comment child (reply)
+            _unitOfWork.CommentRepository.DeleteAllReply(commentEntity.Id);
+            await _unitOfWork.CompleteAsync();
+
+            return Ok(new SuccessObject());
         }
 
         [HttpGet]
-        public async Task<ActionResult> ReplyComment()
+        public async Task<ActionResult> GetAllByPostIdAsync(int postId)
         {
-            return Ok();
+            var commentEntities = await _unitOfWork.CommentRepository.GetAllByPostIdAsync(postId);
+            return Ok(commentEntities);
         }
 
-        [HttpGet]
-        public async Task<ActionResult> UpdateComment()
+        [HttpPost]
+        public async Task<ActionResult> Like(LikeReq req)
         {
-            return Ok();
+            var exitsUser = await _unitOfWork.UserRepository.CheckExitsAsync(req.UserId);
+            var post = await _unitOfWork.PostRepository.GetByIdAsync(req.PostId);
+
+            if (!exitsUser || post is null)
+            {
+                return NotFound();
+            }
+
+            var exitsLike = await _unitOfWork.LikeRepository.CheckExitsAsync(req.PostId, req.UserId);
+            if (exitsLike)
+            {
+                return BadRequest();
+            }
+
+            var likeEntity = new LikeEntity
+            {
+                UserId = req.UserId,
+                PostId = req.PostId
+            };
+            await _unitOfWork.LikeRepository.CreateAsync(likeEntity);
+
+            post.LikeCount++;
+            _unitOfWork.PostRepository.Update(post);
+
+            await _unitOfWork.CompleteAsync();
+
+            return Ok(new SuccessObject());
         }
 
-        [HttpGet]
-        public async Task<ActionResult> DeleteComment()
+        [HttpPost]
+        public async Task<ActionResult> Unlike(LikeReq req)
         {
-            return Ok();
-        }
+            var exitsUser = await _unitOfWork.UserRepository.CheckExitsAsync(req.UserId);
+            var post = await _unitOfWork.PostRepository.GetByIdAsync(req.PostId);
+            var exitsLikeEntity = await _unitOfWork.LikeRepository.GetByIdAsync(req.UserId, req.PostId);
 
-        [HttpGet]
-        public async Task<ActionResult> GetAllCommentOfPost()
-        {
-            return Ok();
-        }
+            if (!exitsUser || post is null || exitsLikeEntity is null)
+            {
+                return NotFound();
+            }
 
-        [HttpGet]
-        public async Task<ActionResult> Like()
-        {
-            return Ok();
-        }
+            _unitOfWork.LikeRepository.Delete(exitsLikeEntity);
 
+            post.LikeCount--;
+            _unitOfWork.PostRepository.Update(post);
 
-        [HttpGet]
-        public async Task<ActionResult> Unlike()
-        {
-            return Ok();
+            await _unitOfWork.CompleteAsync();
+
+            return Ok(new SuccessObject());
         }
     }
 }

@@ -16,7 +16,18 @@ namespace SocialMediaApi.Repositories
 
         public async Task<bool> CheckExitsAsync(int postId)
         {
-            var result =  await DbEntitySet.AnyAsync(i => i.Id == postId);
+            var result = await DbEntitySet.AnyAsync(i => i.Id == postId);
+            return result;
+        }
+
+        public async Task<IEnumerable<PostEntity>> GetPostsAsync(int pageSize, int pageIndex)
+        {
+            var result = await DbEntitySet
+                .OrderBy(p => p.Id)
+                .Skip(pageSize * pageIndex)
+                .Take(pageSize)
+                .AsNoTracking()
+                .ToListAsync();
             return result;
         }
     }

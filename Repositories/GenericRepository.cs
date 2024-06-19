@@ -15,6 +15,11 @@ namespace SocialMediaApi.Repositories
             DbEntitySet = context.Set<TEntity>();
         }
 
+        public async Task<TEntity?> GetByIdAsync(object partialPrimaryKey1, object partialPrimaryKey2)
+        {
+            return await DbEntitySet.FindAsync(partialPrimaryKey1, partialPrimaryKey2);
+        }
+
         public async Task CreateAsync(TEntity entity)
         {
             await DbEntitySet.AddAsync(entity);
@@ -24,7 +29,6 @@ namespace SocialMediaApi.Repositories
         {
             DbEntitySet.Update(entity);
         }
-
 
         public async Task<TEntity?> GetByIdAsync(object id)
         {

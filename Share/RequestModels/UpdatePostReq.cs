@@ -3,15 +3,15 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Share.RequestModels
 {
-    public sealed class UpdatePostReq
+    public sealed record UpdatePostReq
     {
         [Required]
-        public int PostId { get; set; }
+        public int PostId { get; init; }
 
         [Required]
-        public string Title { get; set; }
+        public string Title { get; init; }
 
         [Required]
-        public string Content { get; set; }
+        public string Content { get; init; }
     }
 }

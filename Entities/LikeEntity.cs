@@ -4,19 +4,20 @@ using Microsoft.EntityFrameworkCore;
 namespace SocialMediaApi.Entities
 {
     [Table("Likes")]
-    [PrimaryKey(nameof(SenderId), nameof(ReceiverId))]
+    [PrimaryKey(nameof(UserId), nameof(PostId))]
     public class LikeEntity
     {
-        [ForeignKey(nameof(SenderUser))]
-        public string SenderId { get; set; }
+        [ForeignKey(nameof(User))]
+        public string UserId { get; set; }
 
-        [ForeignKey(nameof(ReceiverUser))]
-        public string ReceiverId { get; set; }
+        [ForeignKey(nameof(Post))]
+        public int PostId { get; set; }
 
 
         [DeleteBehavior(DeleteBehavior.NoAction)]
-        public UserEntity SenderUser { get; set; }
+        public UserEntity User { get; set; }
+
         [DeleteBehavior(DeleteBehavior.NoAction)]
-        public UserEntity ReceiverUser { get; set; }
+        public PostEntity Post { get; set; }
     }
 }
